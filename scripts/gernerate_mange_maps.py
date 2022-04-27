@@ -910,9 +910,14 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
         - (dap_gal_fits["STELLAR_SIGMACORR"].data[1] ** 2)
     )
 
-    # - Add to new mm_fits file
+    # - Add to new stellar velocity maps corrected
     new_hdul.append(fits.ImageHDU(ha_sigma_star_corr1, ver=72, name="STARVEL_DISP1"))
     new_hdul.append(fits.ImageHDU(ha_sigma_star_corr2, ver=73, name="STARVEL_DISP2"))
+
+    # Sigma sSFR
+    new_hdul.append(fits.ImageHDU(ha_sigma_star_corr2, ver=73, name="STARVEL_DISP2"))
+
+
 
     new_hdul.append(
         fits.ImageHDU(ha_sigma_star_map_error, ver=74, name="STARVEL_DISPERR")
