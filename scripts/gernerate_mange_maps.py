@@ -38,11 +38,11 @@ def map_masking(map_arr, mask_arr, fill_val=np.nan, real_val=0):
 def balmer_dec(obs_haflux, obs_hbflux):
     """
     Calculates Balmer decrement (Ha_flux / Hb_flux)
-    
+
     Paremeters:
-        obs_haflux: float, numpy.ndarray, marvin.tools.quantities.map.Map 
+        obs_haflux: float, numpy.ndarray, marvin.tools.quantities.map.Map
             Observed Halpha flux value or Map
-        
+
         obs_hbflux: float, numpy.ndarray, marvin.tools.quantities.map.Map
             Observed Hbeta flux value or Map
     """
@@ -54,11 +54,11 @@ def c00_k(wavelength, Rv=4.05):
     """
     Calzetti extinction curve 2000 (Good for starburst like dust)
     Paremeters:
-    
-        wavelength: float, 
+
+        wavelength: float,
             units of microns
-        
-        Rv: float, 
+
+        Rv: float,
             normilaztion of the extinction curve
 
     Return:
@@ -76,8 +76,8 @@ def c00_k(wavelength, Rv=4.05):
             * (
                 -2.156
                 + (1.509 / wavelength)
-                - (0.198 / wavelength ** 2)
-                + (0.011 / wavelength ** 3)
+                - (0.198 / wavelength**2)
+                + (0.011 / wavelength**3)
             )
             + Rv
         )
@@ -94,18 +94,18 @@ def c00_k(wavelength, Rv=4.05):
 def c00_kcorr(obs_flux, obs_wavelength, bdec, Rv=4.05):
     """
     Extinction correction using the Calzetti extinction curve
-    
+
     Paremeter:
         obs_flux: float, numpy.ndarray, marvin.tools.quantities.map.Map
             Obsereved flux value or map [1e-17erg/cm^2/s/spaxel]
-        
-        obs_wavelength: float, 
+
+        obs_wavelength: float,
             wavelength [micron]
 
         bdec: float, numpy.ndarray, marvin.tools.quantities.map.Map
             Balmer Decrement (Ha/Hb)
             *Must be same type as obs_flux*
-        
+
         Rv: float, curve normilization
 
     Return:
@@ -150,7 +150,7 @@ def sfr_ha_map(halphadc_map, z, bin_area_map):
     """
     Paremters:
         halphadc_map
-    
+
     """
     # sfr_map = (7.9e-42 * halphadc_map) / 1.53
 
@@ -163,7 +163,7 @@ def sfr_ha_map(halphadc_map, z, bin_area_map):
     # Convert flux to Luminosity
     # Halpha Flux : 1e-17*erg/s/cm^2/spaxel
     # From Hoggs 2000 paper
-    lum_ha_map = halphadc_map * (1 + z) * (4 * np.pi * (lum_d_cm ** 2))
+    lum_ha_map = halphadc_map * (1 + z) * (4 * np.pi * (lum_d_cm**2))
     # print('Halpha Flux: ',halphadc_map[27,27])
     # print('Halpha Luminosity: ',l_ha[27,27])
 
@@ -176,18 +176,13 @@ def sfr_ha_map(halphadc_map, z, bin_area_map):
         u.kpc / u.arcsec
     )  # [kpc/arcsec]
     spaxel_area_in_kpc2 = (
-        spaxel_diamter_in_kpc ** 2
+        spaxel_diamter_in_kpc**2
     )  # [kpc2/arcsec2] Since my data is binned the area is a roughly a box for each pixel
 
     # Using the Bin Area to calculate the Area of each bin in Kpc
     spaxel_area_kpc2 = spaxel_area_in_kpc2 * bin_area_map
     # Bin length from the Bin Area Map - np.sqrt(BIN_AREA[arcsec^2])
     # bin_length = np.sqrt(bin_area_map) # [arcsec]
-
-    # spaxel_size = 0.5  # [arcsec]
-    # c = 299792  # speed of light [km/s]
-    # H0 = 70  # [km s^-1 Mpc^-1]
-    # D = c * z / H0  # approx. distance to galaxy [Mpc]
 
     # scale = 1 / 206265 * D * 1e6  # 1 radian = 206265 arcsec [pc / arcsec]
     # spaxel_area_pc2 = (scale * spaxel_size) ** 2 * u.pc ** 2  # [pc^2]
@@ -242,7 +237,7 @@ def n2o2_Z_map(nii6585_fluxmap, oii3727_fluxmap, oii3729_fluxmap):
     # Note: Independent of ionization parameter, Z>=8.6 for a reliable abundance
     fratio_map = np.log10(nii6585_fluxmap / (oii3727_fluxmap + oii3729_fluxmap))
     Z_map = (
-        np.log10(1.54020 + (1.26602 * fratio_map) + (0.167977 * fratio_map ** 2)) + 8.93
+        np.log10(1.54020 + (1.26602 * fratio_map) + (0.167977 * fratio_map**2)) + 8.93
     )  # KD02 (eq 5&7) [Z = log(O/H) +12]
     return fratio_map, Z_map
 
@@ -280,7 +275,7 @@ def pipe3d_maps(plateifu, sample="bbrd"):
     Parameters:
         plateifu: str
             MaNGA plateifu
-    
+
     Return:
     age_l, age_Z, age_err, stel_vel, vel_err, v_disp, v_err, ml_ratio, mass_density
     """
@@ -470,36 +465,60 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
 
     # Read in MaNGA Maps from local directory with MPL11 DAP files -
     # Emmison line units [1e-17 erg / (cm s spaxel)]
-    ha_6564_map = dap_gal_fits[30].data[23]
-    hb_4862_map = dap_gal_fits[30].data[14]
-    nii6585_map = dap_gal_fits[30].data[24]
-    oii3727_map = dap_gal_fits[30].data[0]
-    oii3729_map = dap_gal_fits[30].data[1]
-    o3_5008_map = dap_gal_fits[30].data[16]
-    sii6718_map = dap_gal_fits[30].data[25]
-    sii6732_map = dap_gal_fits[30].data[26]
+    ha_6564_map = dap_gal_fits["EMLINE_GFLUX"].data[23]
+    hb_4862_map = dap_gal_fits["EMLINE_GFLUX"].data[14]
+    nii6585_map = dap_gal_fits["EMLINE_GFLUX"].data[24]
+    oii3727_map = dap_gal_fits["EMLINE_GFLUX"].data[0]
+    oii3729_map = dap_gal_fits["EMLINE_GFLUX"].data[1]
+    o3_5008_map = dap_gal_fits["EMLINE_GFLUX"].data[16]
+    sii6718_map = dap_gal_fits["EMLINE_GFLUX"].data[25]
+    sii6732_map = dap_gal_fits["EMLINE_GFLUX"].data[26]
 
     # Data Quality Maps
-    ha_6564_dqmap = dap_gal_fits[32].data[23]
-    hb_4862_dqmap = dap_gal_fits[32].data[14]
-    nii6585_dqmap = dap_gal_fits[32].data[24]
-    oii3727_dqmap = dap_gal_fits[32].data[0]
-    oii3729_dqmap = dap_gal_fits[32].data[1]
-    o3_5008_dqmap = dap_gal_fits[32].data[16]
-    sii6718_dqmap = dap_gal_fits[32].data[25]
-    sii6732_dqmap = dap_gal_fits[32].data[26]
+    ha_6564_dqmap = dap_gal_fits["EMLINE_GFLUX_MASK"].data[23]
+    hb_4862_dqmap = dap_gal_fits["EMLINE_GFLUX_MASK"].data[14]
+    nii6585_dqmap = dap_gal_fits["EMLINE_GFLUX_MASK"].data[24]
+    oii3727_dqmap = dap_gal_fits["EMLINE_GFLUX_MASK"].data[0]
+    oii3729_dqmap = dap_gal_fits["EMLINE_GFLUX_MASK"].data[1]
+    o3_5008_dqmap = dap_gal_fits["EMLINE_GFLUX_MASK"].data[16]
+    sii6718_dqmap = dap_gal_fits["EMLINE_GFLUX_MASK"].data[25]
+    sii6732_dqmap = dap_gal_fits["EMLINE_GFLUX_MASK"].data[26]
 
-    # # Inverse Varience maps []
-    # ha_6564_ivar_map = dap_gal_fits[31].data[24]
-    # hb_4862_ivar_map = dap_gal_fits[31].data[15]
-    # nii6585_ivar_map = dap_gal_fits[31].data[23]
-    # oii3727_ivar_map = dap_gal_fits[31].data[1]
-    # oii3729_ivar_map = dap_gal_fits[31].data[2]
-    # o3_5008_ivar_map = dap_gal_fits[31].data[17]
-    # sii6718_ivar_map = dap_gal_fits[31].data[26]
-    # sii6732_ivar_map = dap_gal_fits[31].data[27]
+    # SNR Maps [return numpy.abs(self.value * numpy.sqrt(self.ivar)) - Marvin Software]
+    ha_6564_snr_map = np.abs(
+        dap_gal_fits["EMLINE_GFLUX"].data[23]
+        * np.sqrt(dap_gal_fits["EMLINE_GFLUX_IVAR"].data[23])
+    )
+    hb_4862_snr_map = np.abs(
+        dap_gal_fits["EMLINE_GFLUX"].data[15]
+        * np.sqrt(dap_gal_fits["EMLINE_GFLUX_IVAR"].data[15])
+    )
+    nii6585_snr_map = np.abs(
+        dap_gal_fits["EMLINE_GFLUX"].data[23]
+        * np.sqrt(dap_gal_fits["EMLINE_GFLUX_IVAR"].data[23])
+    )
+    oii3727_snr_map = np.abs(
+        dap_gal_fits["EMLINE_GFLUX"].data[1]
+        * np.sqrt(dap_gal_fits["EMLINE_GFLUX_IVAR"].data[1])
+    )
+    oii3729_snr_map = np.abs(
+        dap_gal_fits["EMLINE_GFLUX"].data[2]
+        * np.sqrt(dap_gal_fits["EMLINE_GFLUX_IVAR"].data[2])
+    )
+    o3_5008_snr_map = np.abs(
+        dap_gal_fits["EMLINE_GFLUX"].data[17]
+        * np.sqrt(dap_gal_fits["EMLINE_GFLUX_IVAR"].data[17])
+    )
+    sii6718_snr_map = np.abs(
+        dap_gal_fits["EMLINE_GFLUX"].data[26]
+        * np.sqrt(dap_gal_fits["EMLINE_GFLUX_IVAR"].data[26])
+    )
+    sii6732_snr_map = np.abs(
+        dap_gal_fits["EMLINE_GFLUX"].data[27]
+        * np.sqrt(dap_gal_fits["EMLINE_GFLUX_IVAR"].data[27])
+    )
 
-    # Convert Inverse Varience maps to error maps
+    # Convert Inverse Varience maps to standard error maps
     ha_6564_error_map = np.sqrt(1 / (dap_gal_fits[31].data[23]))
     hb_4862_error_map = np.sqrt(1 / (dap_gal_fits[31].data[14]))
     nii6585_error_map = np.sqrt(1 / (dap_gal_fits[31].data[24]))
@@ -559,7 +578,7 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
     sii6718_mapdc = c00_kcorr(sii6718_map_clean, 0.6718, bdec_map, Rv=4.05)
     sii6732_mapdc = c00_kcorr(sii6732_map_clean, 0.6732, bdec_map, Rv=4.05)
 
-    # Add k-corrected emission line fluxes to FITS file
+    # Add k-corrected emission line fluxes to FITS file - not logged
     new_hdul.append(
         fits.ImageHDU(ha_mapdc, name="Halpha kcorr", ver=2)
     )  # Halpha k-corrected [1e-17 erg / (cm2 s spaxel)]
@@ -571,18 +590,15 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
     new_hdul.append(fits.ImageHDU(sii6718_mapdc, name="SII6718 kcorr", ver=8))
     new_hdul.append(fits.ImageHDU(sii6732_mapdc, name="SII6732 kcorr", ver=9))
 
-    # S/N ratio Maps - replace with SNR calculation from error maps
-    # Warning!!!!!!!: *This is a place holder and should not be used as SNR yet 4/30/2021*
-    new_hdul.append(fits.ImageHDU(ha_6564_error_map, name="Halpha SNR", ver=10))  # SNR
-    new_hdul.append(fits.ImageHDU(hb_4862_error_map, name="Hbeta SNR", ver=11))  # SNR
-    new_hdul.append(fits.ImageHDU(nii6585_error_map, name="NII6585 SNR", ver=12))  # SNR
-    new_hdul.append(fits.ImageHDU(oii3727_error_map, name="OII3727 SNR", ver=13))  # SNR
-    new_hdul.append(fits.ImageHDU(oii3729_error_map, name="OII3729 SNR", ver=14))  # SNR
-    new_hdul.append(
-        fits.ImageHDU(o3_5008_error_map, name="OIII5008 SNR", ver=15)
-    )  # SNR
-    new_hdul.append(fits.ImageHDU(sii6718_error_map, name="SII6718 SNR", ver=16))  # SNR
-    new_hdul.append(fits.ImageHDU(sii6732_error_map, name="SII6732 SNR", ver=17))  # SNR
+    # S/N ratio Maps - SNR calculation
+    new_hdul.append(fits.ImageHDU(ha_6564_snr_map, name="Halpha SNR", ver=10))  # SNR
+    new_hdul.append(fits.ImageHDU(hb_4862_snr_map, name="Hbeta SNR", ver=11))  # SNR
+    new_hdul.append(fits.ImageHDU(nii6585_snr_map, name="NII6585 SNR", ver=12))  # SNR
+    new_hdul.append(fits.ImageHDU(oii3727_snr_map, name="OII3727 SNR", ver=13))  # SNR
+    new_hdul.append(fits.ImageHDU(oii3729_snr_map, name="OII3729 SNR", ver=14))  # SNR
+    new_hdul.append(fits.ImageHDU(o3_5008_snr_map, name="OIII5008 SNR", ver=15))  # SNR
+    new_hdul.append(fits.ImageHDU(sii6718_snr_map, name="SII6718 SNR", ver=16))  # SNR
+    new_hdul.append(fits.ImageHDU(sii6732_snr_map, name="SII6732 SNR", ver=17))  # SNR
 
     # Emission line flux error [1-17 erg / s /spaxel / cm2]
     new_hdul.append(fits.ImageHDU(ha_6564_error_map, name="Halpha ERROR", ver=18))
@@ -607,7 +623,7 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
 
     # Add Star formation
     new_hdul.append(fits.ImageHDU(bdec_map, ver=27, name="Ha/Hb"))  # Balmer decerment
-    new_hdul.append(fits.ImageHDU(l_ha, ver=28, name="Ha Lum"))  # erg / (s spaxel)
+    new_hdul.append(fits.ImageHDU(l_ha, ver=28, name="Ha_Lum"))  # erg / (s spaxel)
     new_hdul.append(
         fits.ImageHDU(np.log10(sfr_map), ver=29, name="logSFR")
     )  # Msolar/yr
@@ -662,18 +678,18 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
             sample, plateifu
         )
     )
-    age_l = pipe3d_gal_fits[1].data[5]
-    age_m = pipe3d_gal_fits[1].data[6]
-    age_err = pipe3d_gal_fits[1].data[7]
-    metal_l = pipe3d_gal_fits[1].data[8]
-    metal_m = pipe3d_gal_fits[1].data[9]
-    metal_err = pipe3d_gal_fits[1].data[10]
-    stel_vel = pipe3d_gal_fits[1].data[13]
-    vel_err = pipe3d_gal_fits[1].data[14]
-    v_disp = pipe3d_gal_fits[1].data[15]
-    v_err = pipe3d_gal_fits[1].data[16]
-    ml_ratio = pipe3d_gal_fits[1].data[17]
-    mass_rho = pipe3d_gal_fits[1].data[
+    age_l = pipe3d_gal_fits["SSP"].data[5]
+    age_m = pipe3d_gal_fits["SSP"].data[6]
+    age_err = pipe3d_gal_fits["SSP"].data[7]
+    metal_l = pipe3d_gal_fits["SSP"].data[8]
+    metal_m = pipe3d_gal_fits["SSP"].data[9]
+    metal_err = pipe3d_gal_fits["SSP"].data[10]
+    stel_vel = pipe3d_gal_fits["SSP"].data[13]
+    vel_err = pipe3d_gal_fits["SSP"].data[14]
+    v_disp = pipe3d_gal_fits["SSP"].data[15]
+    v_err = pipe3d_gal_fits["SSP"].data[16]
+    ml_ratio = pipe3d_gal_fits["SSP"].data[17]
+    mass_rho = pipe3d_gal_fits["SSP"].data[
         19
     ]  # 18 is not dust corrected - 19 is dust corrected
     mass_rho_err = pipe3d_gal_fits[1].data[20]
@@ -696,7 +712,9 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
     new_hdul.append(fits.ImageHDU(v_disp, ver=44, name="Vdisp_km/s"))
     new_hdul.append(fits.ImageHDU(v_err, ver=45, name="Vdisp_err"))
     new_hdul.append(fits.ImageHDU(ml_ratio, ver=46, name="M/L"))
-    new_hdul.append(fits.ImageHDU(mass_rho, ver=47, name="Msun/spx2"))
+    new_hdul.append(
+        fits.ImageHDU(mass_rho, ver=47, name="Msun/spx2")
+    )  # Dust corrected mass density
     new_hdul.append(fits.ImageHDU(mass_rho / 0.25, ver=48, name="Msun/arcs2"))
     new_hdul.append(fits.ImageHDU(mass_rho_err, ver=49, name="Msun_ERR"))
     new_hdul.append(fits.ImageHDU(d4000_index, ver=50, name="D4000"))
@@ -720,8 +738,11 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
     sfms_fit_map_upperlimit = 1.21 * mass_rho - 11.5  # upper limit
     sfms_fit_map_lowerlimit = 0.68 * mass_rho - 7.64  # lower limit
     delta_sfr = np.log10(sfrd_map) - sfms_fit_map  # Delta SFR
+
     new_hdul.append(fits.ImageHDU(delta_sfr, ver=57, name="B20_DELTASFR"))
-    new_hdul.append(fits.ImageHDU(sfms_fit_map, ver=58, name="B20_SFRD"))
+    new_hdul.append(
+        fits.ImageHDU(np.log10(sfr_map) - mass_rho, ver=58, name="Log_Sigma_sSFR")
+    )
     new_hdul.append(
         fits.ImageHDU(sfms_fit_map_upperlimit, ver=59, name="B20_SFRD_UPLIM")
     )
@@ -766,16 +787,16 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
 
     # Correct index for velocity dispersion
     dap_d4000_map_clean_corr = np.sqrt(
-        (dap_d4000_map_clean ** 2) - (dap_gal_fits["SPECINDEX_CORR"].data[43] ** 2)
+        (dap_d4000_map_clean**2) - (dap_gal_fits["SPECINDEX_CORR"].data[43] ** 2)
     )
     dap_dn4000_map_clean_corr = np.sqrt(
-        (dap_dn4000_map_clean ** 2) - (dap_gal_fits["SPECINDEX_CORR"].data[44] ** 2)
+        (dap_dn4000_map_clean**2) - (dap_gal_fits["SPECINDEX_CORR"].data[44] ** 2)
     )
     dap_hdelta_A_map_clean_corr = np.sqrt(
-        (dap_hdelta_A_map_clean ** 2) - (dap_gal_fits["SPECINDEX_CORR"].data[21] ** 2)
+        (dap_hdelta_A_map_clean**2) - (dap_gal_fits["SPECINDEX_CORR"].data[21] ** 2)
     )
     dap_hdelta_F_map_clean_corr = np.sqrt(
-        (dap_hdelta_F_map_clean ** 2) - (dap_gal_fits["SPECINDEX_CORR"].data[23] ** 2)
+        (dap_hdelta_F_map_clean**2) - (dap_gal_fits["SPECINDEX_CORR"].data[23] ** 2)
     )
 
     # Add specindex Maps
@@ -868,7 +889,7 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
 
     # - Corrected velocity dispersion for instrunmental resolution effects
     ha_sigma_gas_corr = np.sqrt(
-        (ha_sigma_gas_map_clean ** 2) - (dap_gal_fits["EMLINE_INSTSIGMA"].data[23] ** 2)
+        (ha_sigma_gas_map_clean**2) - (dap_gal_fits["EMLINE_INSTSIGMA"].data[23] ** 2)
     )
 
     ha_sigma_gas_map_error = map_masking(
@@ -902,11 +923,11 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
     )
     # - Corrected velocity dispersion for instrunmental
     ha_sigma_star_corr1 = np.sqrt(
-        (ha_sigma_star_map_clean ** 2)
+        (ha_sigma_star_map_clean**2)
         - (dap_gal_fits["STELLAR_SIGMACORR"].data[0] ** 2)
     )
     ha_sigma_star_corr2 = np.sqrt(
-        (ha_sigma_star_map_clean ** 2)
+        (ha_sigma_star_map_clean**2)
         - (dap_gal_fits["STELLAR_SIGMACORR"].data[1] ** 2)
     )
 
@@ -914,10 +935,8 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
     new_hdul.append(fits.ImageHDU(ha_sigma_star_corr1, ver=72, name="STARVEL_DISP1"))
     new_hdul.append(fits.ImageHDU(ha_sigma_star_corr2, ver=73, name="STARVEL_DISP2"))
 
-    # Sigma sSFR
+    # Sigma
     new_hdul.append(fits.ImageHDU(ha_sigma_star_corr2, ver=73, name="STARVEL_DISP2"))
-
-
 
     new_hdul.append(
         fits.ImageHDU(ha_sigma_star_map_error, ver=74, name="STARVEL_DISPERR")
@@ -927,7 +946,7 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
     # Update header
     prihdr = new_hdul[0].header
     prihdr["SPX_AREA"] = "{} Kpc^2".format(str(spaxel_area_kpc)[:5])
-    prihdr["kpc/arcsec"] = "{}".format(np.round(spaxel_diamter_in_kpc, 4))
+    prihdr["kpc_arcs"] = "{}".format(np.round(spaxel_diamter_in_kpc, 4))
     # prihdr["kpc/arcsec"] = "{}".format(str(spaxel_diamter_in_kpc)[:5])
     prihdr["REFF"] = "{} ARCSECS".format(str(r_eff)[:5])
     prihdr["z"] = "{} redshift".format(str(z)[:5])
@@ -959,9 +978,7 @@ def write_maps2fits_mpldap(plateifu="None", mode="local", sample="bbrd", z="Fals
 
     # Write data to FITS file
     new_hdul.writeto(
-        "/Users/mmckay/Desktop/research/FMR_MZR/{}_MMfits/{}_MM.fits".format(
-            sample, plateifu
-        ),
+        f"/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/{sample}_MMfits/{plateifu}_MM.fits",
         overwrite=True,
     )
 
@@ -976,129 +993,66 @@ def read_fits_ext(fits_file, ext=1):
 
 # ----------------------------------------Run for single fits file (for testing)--------------------------------------
 # Run code for a single file
+
 # plateifu, nsa_z = "10001-3702", 0.0256063
 # write_maps2fits_mpldap(plateifu, mode="local", sample="bbrd", z=nsa_z)
 # ------------------------------------------------------------------------------------------------
 
 
-# # -----------------------------------Execution of function-------------------------------------------------------------
-# # Read bbrd final crossmatch table
-# bbrd_df = pd.read_csv(
-#     "/Users/mmckay/Desktop/research/FMR_MZR/final_MaNGAdr16_bbrd_crossmatch.csv"
-# )
-# # Run code for all galaxies in a sample
-# print("Executing gernerate functions to make new MM_FITS files")
-# for plateifu, nsa_z in zip(bbrd_df["plateifu"], bbrd_df["nsa_z"]):
-#     # print(plateifu, nsa_z)
-#     write_maps2fits_mpldap(plateifu, mode="local", sample="bbrd", z=nsa_z)
-
-# # --------------------------Storing the 2D maps in ID series of Datafame--------------------------------------
-
-# # 1. Flatten 2D map to a 1D column and stores the in a CSV file
-# # 2. Store 2D Maps as 1D columns in a pandas dataframe in organized by the R/Reff value
-
-# # List of BBRD FITS files made by generate code MM
-# bbrd_fits_filelist = glob.glob(
-#     "/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/*.fits"
-# )
-
-# # The range of FITS extension np.arange(1,1+last ver #,1)
-# extnum_list = np.arange(1, 75, 1)
-
-# # 1.
-# for fit in bbrd_fits_filelist:
-#     hdu = fits.open(fit)
-#     ifu_df = pd.DataFrame()
-#     for extnum in extnum_list:
-#         # Read in 2d data from fits file extension
-#         map2d_data = read_fits_ext(fit, ext=hdu[extnum - 1].name)
-#         # Flatten 2d map
-#         map1d_data = map2d_data.flatten(order="C")
-#         # print(extnum, hdu[extnum-1].ver, hdu[extnum-1].name, map1d_data.shape)
-#         # Pair extname column with the 1D Map data
-#         ifu_df[hdu[extnum - 1].name] = map1d_data
-
-#     # print(ifu_df.shape)
-#     ifu_df.to_csv(
-#         path_or_buf="/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/{}_map.csv".format(
-#             hdu[0].header["plateifu"]
-#         ),
-#         sep=",",
-#     )
-#     hdu.close()
-# # ------------------------------------------------------------------------------------------------
-
-# # ------------- Seperates the files into groups that I set manually and make supercsv file for each group
-
-# # Combine all dataframes into a super dataframe
-# bbrd_csv_list = glob.glob(
-#     "/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/*_map.csv"
-# )
-# combo_csv_list = []
-# agn_combo_csv_list = []
-# xl_combo_csv_list = []
-# for bbrd in bbrd_csv_list:
-#     # Remove the merger and AGN galaxy from the Combo csv file and adds AGn to there own csv
-#     if (
-#         bbrd == "/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/9183-3703_map.csv"
-#         or bbrd
-#         == "/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/11827-1902_map.csv"
-#     ):
-#         # print("appending AGN")
-#         bbrd_df = pd.read_csv(bbrd)
-#         # print(bbrd, bbrd_df.shape)
-#         agn_combo_csv_list.append(bbrd_df)
-#     elif bbrd == "/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/8595-3703_map.csv":
-#         pass
-#     else:
-#         bbrd_df = pd.read_csv(bbrd)
-#         print(bbrd, bbrd_df.shape)
-#         combo_csv_list.append(bbrd_df)
-
-#     # # Remove large galaxies from the combo_bbrd and and adds to there own CSV files
-#     # elif (bbrd == "/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/8312-12704_map.csv"
-#     # or bbrd == "/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/8465-9102_map.csv"
-#     # or bbrd == "/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/8550-12703_map.csv"
-#     # ):
-#     #     print('Appending XL galaxies CSV')
-#     #     bbrd_df = pd.read_csv(bbrd)
-#     #     print(bbrd, bbrd_df.shape)
-#     #     xl_combo_csv_list.append(bbrd_df)
-
-# # Combine csv files
-# bbrd_supercsv = pd.concat(combo_csv_list)
-# # Replace inf value with nans
-# bbrd_supercsv_clean = bbrd_supercsv.replace([np.inf, -np.inf], np.nan)
-# bbrd_supercsv_clean.to_csv(
-#     path_or_buf="/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/bbrd_combo.csv",
-#     sep=",",
-# )
-
-# # Combine AGN csv files
-# bbrd_agn_supercsv = pd.concat(agn_combo_csv_list)
-# # Replace inf value with nans
-# bbrd_agn_supercsv_clean = bbrd_agn_supercsv.replace([np.inf, -np.inf], np.nan)
-# bbrd_agn_supercsv_clean.to_csv(
-#     path_or_buf="/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/bbrd_agn_combo.csv",
-#     sep=",",
-# )
-
-# # bbrd_xl_supercsv = pd.concat(xl_combo_csv_list)
-# # # Replace inf value with nans
-# # bbrd_xl_supercsv_clean = bbrd_xl_supercsv.replace([np.inf, -np.inf], np.nan)
-# # bbrd_xl_supercsv_clean.to_csv(
-# #     path_or_buf="/Users/mmckay/Desktop/research/FMR_MZR/bbrd_MMfits/bbrd_xl_combo.csv",
-# #     sep=",",
-# # )
+# -----------------------------------Execution of function-------------------------------------------------------------
+# Read bbrd final crossmatch table
+bbrd_df = pd.read_csv(
+    "/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/global_merged_dat/bbrd_global_db.csv"
+)
+# Run code for all galaxies in a sample
+print("Executing gernerate functions to make new MM_FITS files")
+for plateifu, nsa_z in zip(bbrd_df["plateifu"], bbrd_df["nsa_z"]):
+    # print(plateifu, nsa_z)
+    write_maps2fits_mpldap(plateifu, mode="local", sample="bbrd", z=nsa_z)
 
 
-# ----------------------------------------LG12 SAMPLE--------------------------------------------------------
+# --------------------------Storing the 2D maps in ID series of Datafame--------------------------------------
+
+# 1. Flatten 2D map to a 1D column and stores the in a CSV file
+# 2. Store 2D Maps as 1D columns in a pandas dataframe in organized by the R/Reff value
+
+# List of BBRD FITS files made by generate code MM
+bbrd_fits_filelist = glob.glob(
+    "/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/bbrd_MMfits/*.fits"
+)
+
+# The range of FITS extension np.arange(1,1+last ver #,1)
+extnum_list = np.arange(1, 75, 1)
+
+# 1.
+for fit in bbrd_fits_filelist:
+    hdu = fits.open(fit)
+    ifu_df = pd.DataFrame()
+    for extnum in extnum_list:
+        # Read in 2d data from fits file extension
+        map2d_data = read_fits_ext(fit, ext=hdu[extnum - 1].name)
+        # Flatten 2d map
+        map1d_data = map2d_data.flatten(order="C")
+        # print(extnum, hdu[extnum-1].ver, hdu[extnum-1].name, map1d_data.shape)
+        # Pair extname column with the 1D Map data
+        ifu_df[hdu[extnum - 1].name] = map1d_data
+
+    # Add a series of plateifu to keep the data labeled
+    ifu_df["PLATEIFU"] = pd.Series(hdu[0].header["plateifu"], index=range(len(ifu_df)))
+    ifu_df.to_csv(
+        path_or_buf="/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/bbrd_MMfits/{}_map.csv".format(
+            hdu[0].header["plateifu"]
+        ),
+        sep=",",
+    )
+    hdu.close()
 
 
+# LG12
 # -----------------------------------Execution of function-------------------------------------------------------------
 # Read lg12 final crossmatch table
 lg12_df = pd.read_csv(
-    "/Users/mmckay/Desktop/research/FMR_MZR/final_MaNGAdr16_lg12_crossmatch.csv"
+    "/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/global_merged_dat/lg12_global_db.csv"
 )
 # Run code for all galaxies in a sample
 print("Executing gernerate functions to make new MM_FITS files")
@@ -1114,7 +1068,7 @@ for plateifu, nsa_z in zip(lg12_df["plateifu"], lg12_df["nsa_z"]):
 
 # List of BBRD FITS files made by generate code MM
 lg12_fits_filelist = glob.glob(
-    "/Users/mmckay/Desktop/research/FMR_MZR/lg12_MMfits/*.fits"
+    "/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/lg12_MMfits/*.fits"
 )
 
 # The range of FITS extension np.arange(1,1+last ver #,1)
@@ -1135,7 +1089,7 @@ for fit in lg12_fits_filelist:
 
     # print(ifu_df.shape)
     ifu_df.to_csv(
-        path_or_buf="/Users/mmckay/Desktop/research/FMR_MZR/lg12_MMfits/{}_map.csv".format(
+        path_or_buf="/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/lg12_MMfits/{}_map.csv".format(
             hdu[0].header["plateifu"]
         ),
         sep=",",
@@ -1143,17 +1097,87 @@ for fit in lg12_fits_filelist:
     hdu.close()
 # ------------------------------------------------------------------------------------------------
 
-# ------------- Seperates the files into groups that I set manually and make supercsv file for each group
+# ------------------------------------------------------------------------------------------------
 
-# Combine all dataframes into a super dataframe
-lg12_csv_list = glob.glob(
-    "/Users/mmckay/Desktop/research/FMR_MZR/lg12_MMfits/*_map.csv"
-)
-combo_csv_list = []
-for lg12 in lg12_csv_list:
-    lg12_df = pd.read_csv(lg12)
-    print(lg12, lg12_df.shape)
-    combo_csv_list.append(lg12_df)
+# # ------------- Seperates the files into groups that I set manually and make supercsv file for each group
+
+# # Combine all dataframes into a super dataframe
+# bbrd_csv_list = glob.glob(
+#     "/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/bbrd_MMfits/*_map.csv"
+# )
+# combo_csv_list = []
+# agn_combo_csv_list = []
+# xl_combo_csv_list = []
+# for bbrd in bbrd_csv_list:
+#     # Remove the merger and AGN galaxy from the Combo csv file and adds AGn to there own csv
+#     if (
+#         bbrd == "/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/bbrd_MMfits/9183-3703_map.csv"
+#         or bbrd
+#         == "/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/bbrd_MMfits/11827-1902_map.csv"
+#     ):
+#         # print("appending AGN")
+#         bbrd_df = pd.read_csv(bbrd)
+#         agn_combo_csv_list.append(bbrd_df)
+
+#     elif bbrd == "/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/bbrd_MMfits/8595-3703_map.csv":
+#         pass
+
+#     else:
+#         bbrd_df = pd.read_csv(bbrd)
+#         # print(bbrd, bbrd_df.shape)
+#         combo_csv_list_df.append(bbrd_df)
+
+# # Remove large galaxies from the combo_bbrd and and adds to there own CSV files
+# elif (bbrd == "/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/bbrd_MMfits/8312-12704_map.csv"
+# or bbrd == "/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/bbrd_MMfits/8465-9102_map.csv"
+# or bbrd == "/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/bbrd_MMfits/8550-12703_map.csv"
+# ):
+#     print('Appending XL galaxies CSV')
+#     bbrd_df = pd.read_csv(bbrd)
+#     print(bbrd, bbrd_df.shape)
+#     xl_combo_csv_list.append(bbrd_df)
+
+# # Combine csv files
+# bbrd_supercsv = pd.concat(combo_csv_list, ignore_index=True)
+# # Replace inf value with nans
+# bbrd_supercsv_clean = bbrd_supercsv.replace([np.inf, -np.inf], np.nan)
+# bbrd_supercsv_clean.to_csv(
+#     path_or_buf="/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/supercsv_ifu_df/bbrd_combo.csv",
+#     sep=",",
+# )
+
+# # Combine AGN csv files
+# bbrd_agn_supercsv = pd.concat(agn_combo_csv_list, ignore_index=True)
+# # Replace inf value with nans
+# bbrd_agn_supercsv_clean = bbrd_agn_supercsv.replace([np.inf, -np.inf], np.nan)
+# bbrd_agn_supercsv_clean.to_csv(
+#     path_or_buf="/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/supercsv_ifu_df/bbrd_agn_combo.csv",
+#     sep=",",
+# )
+
+# bbrd_xl_supercsv = pd.concat(xl_combo_csv_list)
+# # Replace inf value with nans
+# bbrd_xl_supercsv_clean = bbrd_xl_supercsv.replace([np.inf, -np.inf], np.nan)
+# bbrd_xl_supercsv_clean.to_csv(
+#     path_or_buf="/Users/mmckay/Desktop/research/BreakBRD_LG12_analysis_repo/2d_bbrd_lg12_maps_v5/bbrd_MMfits/bbrd_xl_combo.csv",
+#     sep=",",
+# )
+
+
+# ----------------------------------------LG12 SAMPLE--------------------------------------------------------
+
+
+# # ------------- Seperates the files into groups that I set manually and make supercsv file for each group
+
+# # Combine all dataframes into a super dataframe
+# lg12_csv_list = glob.glob(
+#     "/Users/mmckay/Desktop/research/FMR_MZR/lg12_MMfits/*_map.csv"
+# )
+# combo_csv_list = []
+# for lg12 in lg12_csv_list:
+#     lg12_df = pd.read_csv(lg12)
+#     print(lg12, lg12_df.shape)
+#     combo_csv_list.append(lg12_df)
 
 
 # # Write the Combined as a super-csv file
